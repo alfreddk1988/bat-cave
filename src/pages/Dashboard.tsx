@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react'
 import { supabase } from '../lib/supabase'
 import type { DailyBriefing, Task, TokenDailySummary } from '../lib/supabase'
 import { LineChart, Line, XAxis, YAxis, ResponsiveContainer } from 'recharts'
-import { Calendar, DollarSign, CheckCircle, AlertTriangle, Plus } from 'lucide-react'
+import { Calendar, DollarSign, CheckCircle, AlertTriangle, Plus, Sparkles } from 'lucide-react'
 import { format } from 'date-fns'
 
 export function Dashboard() {
@@ -71,62 +71,77 @@ export function Dashboard() {
   if (loading) {
     return (
       <div className="flex items-center justify-center h-64">
-        <div className="text-gray-400">Loading dashboard...</div>
+        <div className="glass-card p-8">
+          <div className="flex items-center space-x-3 text-gray-300">
+            <div className="animate-spin">
+              <Sparkles className="w-6 h-6 text-indigo-400" />
+            </div>
+            <span className="font-medium">Loading dashboard...</span>
+          </div>
+        </div>
       </div>
     )
   }
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-8">
       {/* Header */}
-      <div className="flex justify-between items-center">
-        <div>
-          <h1 className="text-3xl font-bold text-white">Dashboard</h1>
-          <p className="text-gray-400">Welcome back, Dallin. Here's what's happening.</p>
+      <div className="flex justify-between items-start">
+        <div className="space-y-2">
+          <h1 className="text-4xl font-light text-white">Dashboard</h1>
+          <p className="text-gray-400 text-lg font-light">Welcome back, Dallin. Here's what's happening.</p>
         </div>
-        <div className="flex space-x-3">
-          <button className="btn-primary">
-            <Plus className="w-4 h-4 mr-2" />
-            Add Task
+        <div className="flex space-x-4">
+          <button className="btn-primary flex items-center space-x-2">
+            <Plus className="w-5 h-5" />
+            <span>Add Task</span>
           </button>
         </div>
       </div>
 
       {/* Today's Briefing */}
       {briefing && (
-        <div className="card">
-          <div className="flex items-center space-x-2 mb-4">
-            <Calendar className="w-5 h-5 text-amber-500" />
-            <h2 className="text-xl font-semibold">Today's Briefing</h2>
+        <div className="glass-card p-8 relative overflow-hidden">
+          <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-indigo-500/50 to-transparent"></div>
+          
+          <div className="flex items-center space-x-3 mb-6">
+            <div className="p-2 bg-gradient-to-br from-indigo-500/20 to-purple-500/20 rounded-xl">
+              <Calendar className="w-6 h-6 text-indigo-400" />
+            </div>
+            <div>
+              <h2 className="text-2xl font-light text-white">Today's Briefing</h2>
+              <p className="text-sm text-gray-400">{format(new Date(), 'EEEE, MMMM d')}</p>
+            </div>
           </div>
-          <p className="text-gray-300 mb-4">{briefing.summary}</p>
+          
+          <p className="text-gray-300 mb-6 text-lg font-light leading-relaxed">{briefing.summary}</p>
           
           {briefing.weather && (
-            <div className="bg-gray-900 rounded-lg p-3 mb-4">
-              <p className="text-sm text-gray-400">{briefing.weather}</p>
+            <div className="glass-card p-4 mb-6 bg-gradient-to-r from-blue-500/10 to-purple-500/10">
+              <p className="text-gray-300 font-light">{briefing.weather}</p>
             </div>
           )}
           
-          <div className="grid grid-cols-2 gap-4">
-            <div>
-              <h4 className="text-sm font-medium text-gray-400 mb-2">Email Highlights</h4>
-              <div className="space-y-1">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+            <div className="space-y-3">
+              <h4 className="text-lg font-medium text-white mb-4">Email Highlights</h4>
+              <div className="space-y-3">
                 {briefing.email_highlights.slice(0, 3).map((email: any, i) => (
-                  <div key={i} className="text-sm bg-gray-900 rounded p-2">
-                    <div className="font-medium">{email.subject}</div>
-                    <div className="text-gray-400">{email.from}</div>
+                  <div key={i} className="glass-card p-4 hover:bg-white/10 transition-all duration-200">
+                    <div className="font-medium text-white mb-1">{email.subject}</div>
+                    <div className="text-gray-400 text-sm">{email.from}</div>
                   </div>
                 ))}
               </div>
             </div>
             
-            <div>
-              <h4 className="text-sm font-medium text-gray-400 mb-2">Calendar Events</h4>
-              <div className="space-y-1">
+            <div className="space-y-3">
+              <h4 className="text-lg font-medium text-white mb-4">Calendar Events</h4>
+              <div className="space-y-3">
                 {briefing.calendar_events.slice(0, 3).map((event: any, i) => (
-                  <div key={i} className="text-sm bg-gray-900 rounded p-2">
-                    <div className="font-medium">{event.title}</div>
-                    <div className="text-gray-400">{event.time}</div>
+                  <div key={i} className="glass-card p-4 hover:bg-white/10 transition-all duration-200">
+                    <div className="font-medium text-white mb-1">{event.title}</div>
+                    <div className="text-gray-400 text-sm">{event.time}</div>
                   </div>
                 ))}
               </div>
@@ -136,56 +151,64 @@ export function Dashboard() {
       )}
 
       {/* Metrics Cards */}
-      <div className="grid grid-cols-4 gap-6">
-        <div className="card">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+        <div className="metric-card group">
           <div className="flex items-center justify-between">
-            <div>
-              <p className="text-gray-400 text-sm">Today's Spend</p>
-              <p className="text-2xl font-bold text-white font-mono">
+            <div className="space-y-2">
+              <p className="text-gray-400 text-sm font-medium">Today's Spend</p>
+              <p className="text-3xl font-light text-white font-mono">
                 ${tokenSummary?.total_cost || '0.00'}
               </p>
             </div>
-            <DollarSign className="w-8 h-8 text-amber-500" />
-          </div>
-        </div>
-
-        <div className="card">
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-gray-400 text-sm">Active Tasks</p>
-              <p className="text-2xl font-bold text-white">{activeTasks.length}</p>
+            <div className="p-3 bg-gradient-to-br from-green-500/20 to-emerald-500/20 rounded-xl group-hover:scale-110 transition-transform duration-200">
+              <DollarSign className="w-8 h-8 text-green-400" />
             </div>
-            <CheckCircle className="w-8 h-8 text-green-500" />
           </div>
         </div>
 
-        <div className="card">
+        <div className="metric-card group">
           <div className="flex items-center justify-between">
-            <div>
-              <p className="text-gray-400 text-sm">Sessions Today</p>
-              <p className="text-2xl font-bold text-white">{tokenSummary?.session_count || 0}</p>
+            <div className="space-y-2">
+              <p className="text-gray-400 text-sm font-medium">Active Tasks</p>
+              <p className="text-3xl font-light text-white">{activeTasks.length}</p>
             </div>
-            <AlertTriangle className="w-8 h-8 text-blue-500" />
+            <div className="p-3 bg-gradient-to-br from-blue-500/20 to-cyan-500/20 rounded-xl group-hover:scale-110 transition-transform duration-200">
+              <CheckCircle className="w-8 h-8 text-blue-400" />
+            </div>
           </div>
         </div>
 
-        <div className="card">
+        <div className="metric-card group">
           <div className="flex items-center justify-between">
-            <div>
-              <p className="text-gray-400 text-sm">Total Tokens</p>
-              <p className="text-2xl font-bold text-white font-mono">
+            <div className="space-y-2">
+              <p className="text-gray-400 text-sm font-medium">Sessions Today</p>
+              <p className="text-3xl font-light text-white">{tokenSummary?.session_count || 0}</p>
+            </div>
+            <div className="p-3 bg-gradient-to-br from-indigo-500/20 to-purple-500/20 rounded-xl group-hover:scale-110 transition-transform duration-200">
+              <AlertTriangle className="w-8 h-8 text-indigo-400" />
+            </div>
+          </div>
+        </div>
+
+        <div className="metric-card group">
+          <div className="flex items-center justify-between">
+            <div className="space-y-2">
+              <p className="text-gray-400 text-sm font-medium">Total Tokens</p>
+              <p className="text-3xl font-light text-white font-mono">
                 {((tokenSummary?.total_input_tokens || 0) + (tokenSummary?.total_output_tokens || 0)).toLocaleString()}
               </p>
             </div>
-            <Calendar className="w-8 h-8 text-purple-500" />
+            <div className="p-3 bg-gradient-to-br from-purple-500/20 to-pink-500/20 rounded-xl group-hover:scale-110 transition-transform duration-200">
+              <Sparkles className="w-8 h-8 text-purple-400" />
+            </div>
           </div>
         </div>
       </div>
 
-      <div className="grid grid-cols-2 gap-6">
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
         {/* Weekly Spend Chart */}
-        <div className="card">
-          <h3 className="text-lg font-semibold mb-4">7-Day Spending Trend</h3>
+        <div className="glass-card p-8">
+          <h3 className="text-xl font-light text-white mb-6">7-Day Spending Trend</h3>
           <div className="h-64">
             <ResponsiveContainer width="100%" height="100%">
               <LineChart data={weeklySpend}>
@@ -193,33 +216,44 @@ export function Dashboard() {
                   dataKey="date" 
                   tick={{ fill: '#9CA3AF', fontSize: 12 }}
                   tickFormatter={(value) => format(new Date(value), 'MM/dd')}
+                  axisLine={false}
+                  tickLine={false}
                 />
                 <YAxis 
                   tick={{ fill: '#9CA3AF', fontSize: 12 }}
                   tickFormatter={(value) => `$${value}`}
+                  axisLine={false}
+                  tickLine={false}
                 />
                 <Line 
                   type="monotone" 
                   dataKey="total_cost" 
-                  stroke="#F59E0B" 
-                  strokeWidth={2}
-                  dot={{ fill: '#F59E0B', strokeWidth: 0, r: 4 }}
+                  stroke="url(#gradient)"
+                  strokeWidth={3}
+                  dot={{ fill: '#6366f1', strokeWidth: 0, r: 5 }}
+                  activeDot={{ r: 7, fill: '#8b5cf6' }}
                 />
+                <defs>
+                  <linearGradient id="gradient" x1="0%" y1="0%" x2="100%" y2="0%">
+                    <stop offset="0%" stopColor="#6366f1" />
+                    <stop offset="100%" stopColor="#8b5cf6" />
+                  </linearGradient>
+                </defs>
               </LineChart>
             </ResponsiveContainer>
           </div>
         </div>
 
         {/* Tasks by Project */}
-        <div className="card">
-          <h3 className="text-lg font-semibold mb-4">Active Tasks by Project</h3>
-          <div className="space-y-3">
+        <div className="glass-card p-8">
+          <h3 className="text-xl font-light text-white mb-6">Active Tasks by Project</h3>
+          <div className="space-y-4">
             {Object.entries(tasksByProject).map(([project, count]) => (
-              <div key={project} className="flex items-center justify-between">
-                <span className="text-gray-300">{project}</span>
-                <span className="bg-amber-500 text-gray-900 px-2 py-1 rounded-full text-sm font-medium">
+              <div key={project} className="flex items-center justify-between p-4 glass-card hover:bg-white/5 transition-all duration-200">
+                <span className="text-gray-300 font-medium">{project}</span>
+                <div className="px-3 py-1 bg-gradient-to-r from-indigo-500 to-purple-500 text-white rounded-full text-sm font-medium">
                   {count}
-                </span>
+                </div>
               </div>
             ))}
           </div>

@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react'
 import { supabase } from '../lib/supabase'
 import type { SystemHealth as SystemHealthType } from '../lib/supabase'
-import { Activity, AlertTriangle, CheckCircle, Clock, Settings, Zap } from 'lucide-react'
+import { Activity, AlertTriangle, CheckCircle, Clock, Settings, Zap, Sparkles } from 'lucide-react'
 import { format, formatDistanceToNow } from 'date-fns'
 
 const statusIcons = {
@@ -80,109 +80,134 @@ export function SystemHealth() {
   if (loading) {
     return (
       <div className="flex items-center justify-center h-64">
-        <div className="text-gray-400">Loading system health data...</div>
+        <div className="glass-card p-8">
+          <div className="flex items-center space-x-3 text-gray-300">
+            <div className="animate-spin">
+              <Sparkles className="w-6 h-6 text-indigo-400" />
+            </div>
+            <span className="font-medium">Loading system health data...</span>
+          </div>
+        </div>
       </div>
     )
   }
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-8">
       {/* Header */}
-      <div>
-        <h1 className="text-3xl font-bold text-white">System Health</h1>
-        <p className="text-gray-400">Monitor Alfred's heartbeat and system status</p>
+      <div className="space-y-2">
+        <h1 className="text-4xl font-light text-white">System Health</h1>
+        <p className="text-gray-400 text-lg font-light">Monitor Alfred's heartbeat and system status</p>
       </div>
 
       {/* Status Overview */}
-      <div className="grid grid-cols-4 gap-6">
-        <div className="card">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+        <div className="metric-card group">
           <div className="flex items-center justify-between">
-            <div>
-              <p className="text-gray-400 text-sm">System Status</p>
-              <p className={`text-2xl font-bold ${errorCount > 0 ? 'text-red-500' : warningCount > 0 ? 'text-yellow-500' : 'text-green-500'}`}>
+            <div className="space-y-2">
+              <p className="text-gray-400 text-sm font-medium">System Status</p>
+              <p className={`text-3xl font-light ${errorCount > 0 ? 'text-red-400' : warningCount > 0 ? 'text-yellow-400' : 'text-green-400'}`}>
                 {errorCount > 0 ? 'Error' : warningCount > 0 ? 'Warning' : 'Healthy'}
               </p>
             </div>
-            {errorCount > 0 ? (
-              <AlertTriangle className="w-8 h-8 text-red-500" />
-            ) : warningCount > 0 ? (
-              <AlertTriangle className="w-8 h-8 text-yellow-500" />
-            ) : (
-              <CheckCircle className="w-8 h-8 text-green-500" />
-            )}
-          </div>
-        </div>
-
-        <div className="card">
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-gray-400 text-sm">Active Errors</p>
-              <p className="text-2xl font-bold text-red-500">{errorCount}</p>
+            <div className={`p-3 rounded-xl group-hover:scale-110 transition-transform duration-200 ${
+              errorCount > 0 
+                ? 'bg-gradient-to-br from-red-500/20 to-red-600/20'
+                : warningCount > 0 
+                  ? 'bg-gradient-to-br from-yellow-500/20 to-orange-500/20'
+                  : 'bg-gradient-to-br from-green-500/20 to-emerald-500/20'
+            }`}>
+              {errorCount > 0 ? (
+                <AlertTriangle className="w-8 h-8 text-red-400" />
+              ) : warningCount > 0 ? (
+                <AlertTriangle className="w-8 h-8 text-yellow-400" />
+              ) : (
+                <CheckCircle className="w-8 h-8 text-green-400" />
+              )}
             </div>
-            <AlertTriangle className="w-8 h-8 text-red-500" />
           </div>
         </div>
 
-        <div className="card">
+        <div className="metric-card group">
           <div className="flex items-center justify-between">
-            <div>
-              <p className="text-gray-400 text-sm">Warnings</p>
-              <p className="text-2xl font-bold text-yellow-500">{warningCount}</p>
+            <div className="space-y-2">
+              <p className="text-gray-400 text-sm font-medium">Active Errors</p>
+              <p className="text-3xl font-light text-red-400">{errorCount}</p>
             </div>
-            <AlertTriangle className="w-8 h-8 text-yellow-500" />
+            <div className="p-3 bg-gradient-to-br from-red-500/20 to-red-600/20 rounded-xl group-hover:scale-110 transition-transform duration-200">
+              <AlertTriangle className="w-8 h-8 text-red-400" />
+            </div>
           </div>
         </div>
 
-        <div className="card">
+        <div className="metric-card group">
           <div className="flex items-center justify-between">
-            <div>
-              <p className="text-gray-400 text-sm">Last Heartbeat</p>
-              <p className="text-lg font-bold text-white">
+            <div className="space-y-2">
+              <p className="text-gray-400 text-sm font-medium">Warnings</p>
+              <p className="text-3xl font-light text-yellow-400">{warningCount}</p>
+            </div>
+            <div className="p-3 bg-gradient-to-br from-yellow-500/20 to-orange-500/20 rounded-xl group-hover:scale-110 transition-transform duration-200">
+              <AlertTriangle className="w-8 h-8 text-yellow-400" />
+            </div>
+          </div>
+        </div>
+
+        <div className="metric-card group">
+          <div className="flex items-center justify-between">
+            <div className="space-y-2">
+              <p className="text-gray-400 text-sm font-medium">Last Heartbeat</p>
+              <p className="text-lg font-light text-white">
                 {lastHeartbeat ? formatDistanceToNow(new Date(lastHeartbeat.timestamp), { addSuffix: true }) : 'Never'}
               </p>
             </div>
-            <Activity className={`w-8 h-8 ${lastHeartbeat ? 'text-green-500' : 'text-gray-500'}`} />
+            <div className={`p-3 rounded-xl group-hover:scale-110 transition-transform duration-200 ${
+              lastHeartbeat ? 'bg-gradient-to-br from-green-500/20 to-emerald-500/20' : 'bg-gradient-to-br from-gray-500/20 to-gray-600/20'
+            }`}>
+              <Activity className={`w-8 h-8 ${lastHeartbeat ? 'text-green-400' : 'text-gray-500'}`} />
+            </div>
           </div>
         </div>
       </div>
 
       {/* Recent Activity */}
-      <div className="card">
-        <h2 className="text-xl font-semibold mb-4">Recent Activity</h2>
-        <div className="space-y-3">
+      <div className="glass-card p-8">
+        <h2 className="text-2xl font-light text-white mb-6">Recent Activity</h2>
+        <div className="space-y-4">
           {recentChecks.map((check) => {
             const Icon = checkTypeIcons[check.check_type as keyof typeof checkTypeIcons] || Activity
             const StatusIcon = statusIcons[check.status as keyof typeof statusIcons]
             
             return (
-              <div key={check.id} className="flex items-center space-x-4 p-3 bg-gray-900 rounded-lg">
-                <div className="flex-shrink-0">
-                  <Icon className="w-5 h-5 text-amber-500" />
-                </div>
-                
-                <div className="flex-1">
-                  <div className="flex items-center space-x-2">
-                    <span className="font-medium text-white capitalize">
-                      {check.check_type.replace('_', ' ')}
-                    </span>
-                    <StatusIcon className={`w-4 h-4 ${statusColors[check.status as keyof typeof statusColors]}`} />
-                    {check.resolved && (
-                      <span className="text-xs bg-green-600 text-white px-2 py-1 rounded">RESOLVED</span>
+              <div key={check.id} className="glass-card p-5 hover:bg-white/5 transition-all duration-200">
+                <div className="flex items-center space-x-4">
+                  <div className="flex-shrink-0 p-2 bg-gradient-to-br from-indigo-500/20 to-purple-500/20 rounded-xl">
+                    <Icon className="w-5 h-5 text-indigo-400" />
+                  </div>
+                  
+                  <div className="flex-1 space-y-2">
+                    <div className="flex items-center space-x-3">
+                      <span className="font-medium text-white capitalize">
+                        {check.check_type.replace('_', ' ')}
+                      </span>
+                      <StatusIcon className={`w-4 h-4 ${statusColors[check.status as keyof typeof statusColors]}`} />
+                      {check.resolved && (
+                        <span className="text-xs bg-green-500 text-white px-2 py-1 rounded-full font-medium">RESOLVED</span>
+                      )}
+                    </div>
+                    
+                    {check.details && (
+                      <p className="text-sm text-gray-400 font-light leading-relaxed">
+                        {typeof check.details === 'string' 
+                          ? check.details 
+                          : JSON.stringify(check.details).slice(0, 100) + '...'
+                        }
+                      </p>
                     )}
                   </div>
                   
-                  {check.details && (
-                    <p className="text-sm text-gray-400 mt-1">
-                      {typeof check.details === 'string' 
-                        ? check.details 
-                        : JSON.stringify(check.details).slice(0, 100) + '...'
-                      }
-                    </p>
-                  )}
-                </div>
-                
-                <div className="text-sm text-gray-400">
-                  {format(new Date(check.timestamp), 'MMM dd, HH:mm')}
+                  <div className="text-sm text-gray-400 font-mono">
+                    {format(new Date(check.timestamp), 'MMM dd, HH:mm')}
+                  </div>
                 </div>
               </div>
             )
@@ -191,11 +216,11 @@ export function SystemHealth() {
       </div>
 
       {/* Detailed Log */}
-      <div className="card">
-        <div className="flex items-center justify-between mb-4">
-          <h2 className="text-xl font-semibold">System Log</h2>
+      <div className="glass-card p-8">
+        <div className="flex items-center justify-between mb-6">
+          <h2 className="text-2xl font-light text-white">System Log</h2>
           <select
-            className="input-field"
+            className="glass-input"
             value={filter}
             onChange={(e) => setFilter(e.target.value)}
           >
@@ -211,12 +236,12 @@ export function SystemHealth() {
         <div className="overflow-x-auto">
           <table className="w-full">
             <thead>
-              <tr className="border-b border-gray-700">
-                <th className="text-left py-3 px-4 font-medium text-gray-400">Timestamp</th>
-                <th className="text-left py-3 px-4 font-medium text-gray-400">Type</th>
-                <th className="text-left py-3 px-4 font-medium text-gray-400">Status</th>
-                <th className="text-left py-3 px-4 font-medium text-gray-400">Details</th>
-                <th className="text-left py-3 px-4 font-medium text-gray-400">Resolved</th>
+              <tr className="border-b border-white/10">
+                <th className="text-left py-4 px-6 font-medium text-gray-400">Timestamp</th>
+                <th className="text-left py-4 px-6 font-medium text-gray-400">Type</th>
+                <th className="text-left py-4 px-6 font-medium text-gray-400">Status</th>
+                <th className="text-left py-4 px-6 font-medium text-gray-400">Details</th>
+                <th className="text-left py-4 px-6 font-medium text-gray-400">Resolved</th>
               </tr>
             </thead>
             <tbody>
@@ -225,26 +250,26 @@ export function SystemHealth() {
                 const StatusIcon = statusIcons[check.status as keyof typeof statusIcons]
                 
                 return (
-                  <tr key={check.id} className="border-b border-gray-800 hover:bg-gray-800/50">
-                    <td className="py-3 px-4 text-gray-300">
+                  <tr key={check.id} className="border-b border-white/5 hover:bg-white/5 transition-all duration-200">
+                    <td className="py-4 px-6 text-gray-300 font-mono text-sm">
                       {format(new Date(check.timestamp), 'MMM dd, yyyy HH:mm:ss')}
                     </td>
-                    <td className="py-3 px-4">
-                      <div className="flex items-center space-x-2">
-                        <Icon className="w-4 h-4 text-amber-500" />
-                        <span className="text-white capitalize">{check.check_type.replace('_', ' ')}</span>
+                    <td className="py-4 px-6">
+                      <div className="flex items-center space-x-3">
+                        <Icon className="w-4 h-4 text-indigo-400" />
+                        <span className="text-white capitalize font-medium">{check.check_type.replace('_', ' ')}</span>
                       </div>
                     </td>
-                    <td className="py-3 px-4">
+                    <td className="py-4 px-6">
                       <div className="flex items-center space-x-2">
                         <StatusIcon className={`w-4 h-4 ${statusColors[check.status as keyof typeof statusColors]}`} />
-                        <span className={`capitalize ${statusColors[check.status as keyof typeof statusColors]}`}>
+                        <span className={`capitalize font-medium ${statusColors[check.status as keyof typeof statusColors]}`}>
                           {check.status}
                         </span>
                       </div>
                     </td>
-                    <td className="py-3 px-4 max-w-md">
-                      <div className="text-gray-300 text-sm truncate">
+                    <td className="py-4 px-6 max-w-md">
+                      <div className="text-gray-300 text-sm font-light leading-relaxed truncate">
                         {check.details 
                           ? (typeof check.details === 'string' 
                               ? check.details 
@@ -254,9 +279,9 @@ export function SystemHealth() {
                         }
                       </div>
                     </td>
-                    <td className="py-3 px-4">
+                    <td className="py-4 px-6">
                       {check.resolved ? (
-                        <CheckCircle className="w-4 h-4 text-green-500" />
+                        <CheckCircle className="w-4 h-4 text-green-400" />
                       ) : (
                         <span className="text-gray-500">—</span>
                       )}
@@ -270,9 +295,11 @@ export function SystemHealth() {
       </div>
 
       {filteredChecks.length === 0 && (
-        <div className="text-center py-12">
-          <Activity className="w-12 h-12 text-gray-600 mx-auto mb-4" />
-          <p className="text-gray-400">No system health data found.</p>
+        <div className="text-center py-16">
+          <div className="glass-card p-12 max-w-md mx-auto">
+            <Activity className="w-16 h-16 text-gray-600 mx-auto mb-6" />
+            <p className="text-gray-400 text-lg font-light">No system health data found.</p>
+          </div>
         </div>
       )}
     </div>

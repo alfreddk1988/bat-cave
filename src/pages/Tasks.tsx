@@ -1,15 +1,15 @@
 import { useEffect, useState } from 'react'
 import { supabase } from '../lib/supabase'
 import type { Task } from '../lib/supabase'
-import { Plus, Search, Filter, Calendar, User, Flag } from 'lucide-react'
+import { Plus, Search, Filter, Calendar, User, Flag, Sparkles } from 'lucide-react'
 import { format } from 'date-fns'
 
 const statusColors = {
-  pending: 'bg-yellow-500',
-  in_progress: 'bg-blue-500',
-  blocked: 'bg-red-500',
-  done: 'bg-green-500',
-  cancelled: 'bg-gray-500'
+  pending: 'bg-yellow-400',
+  in_progress: 'bg-blue-400',
+  blocked: 'bg-red-400',
+  done: 'bg-green-400',
+  cancelled: 'bg-gray-400'
 }
 
 const priorityColors = {
@@ -107,41 +107,48 @@ export function Tasks() {
   if (loading) {
     return (
       <div className="flex items-center justify-center h-64">
-        <div className="text-gray-400">Loading tasks...</div>
+        <div className="glass-card p-8">
+          <div className="flex items-center space-x-3 text-gray-300">
+            <div className="animate-spin">
+              <Sparkles className="w-6 h-6 text-indigo-400" />
+            </div>
+            <span className="font-medium">Loading tasks...</span>
+          </div>
+        </div>
       </div>
     )
   }
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-8">
       {/* Header */}
-      <div className="flex justify-between items-center">
-        <div>
-          <h1 className="text-3xl font-bold text-white">Tasks</h1>
-          <p className="text-gray-400">Manage your tasks and project work</p>
+      <div className="flex justify-between items-start">
+        <div className="space-y-2">
+          <h1 className="text-4xl font-light text-white">Tasks</h1>
+          <p className="text-gray-400 text-lg font-light">Manage your tasks and project work</p>
         </div>
-        <div className="flex space-x-3">
-          <button className="btn-secondary">
-            <Filter className="w-4 h-4 mr-2" />
-            Filter
+        <div className="flex space-x-4">
+          <button className="btn-secondary flex items-center space-x-2">
+            <Filter className="w-5 h-5" />
+            <span>Filter</span>
           </button>
-          <button className="btn-primary">
-            <Plus className="w-4 h-4 mr-2" />
-            New Task
+          <button className="btn-primary flex items-center space-x-2">
+            <Plus className="w-5 h-5" />
+            <span>New Task</span>
           </button>
         </div>
       </div>
 
       {/* Filters */}
-      <div className="card">
-        <div className="flex flex-wrap gap-4">
+      <div className="glass-card p-6">
+        <div className="flex flex-wrap gap-6">
           <div className="flex-1 min-w-64">
             <div className="relative">
-              <Search className="w-5 h-5 absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
+              <Search className="w-5 h-5 absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400" />
               <input
                 type="text"
                 placeholder="Search tasks..."
-                className="input-field pl-10 w-full"
+                className="glass-input pl-12 w-full"
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
               />
@@ -149,7 +156,7 @@ export function Tasks() {
           </div>
           
           <select 
-            className="input-field"
+            className="glass-input min-w-32"
             value={statusFilter}
             onChange={(e) => setStatusFilter(e.target.value)}
           >
@@ -162,7 +169,7 @@ export function Tasks() {
           </select>
 
           <select 
-            className="input-field"
+            className="glass-input min-w-32"
             value={projectFilter}
             onChange={(e) => setProjectFilter(e.target.value)}
           >
@@ -172,15 +179,23 @@ export function Tasks() {
             ))}
           </select>
 
-          <div className="flex bg-gray-700 rounded-lg p-1">
+          <div className="flex glass-card p-1">
             <button
-              className={`px-3 py-1 rounded ${viewMode === 'table' ? 'bg-amber-500 text-gray-900' : 'text-gray-300'}`}
+              className={`px-4 py-2 rounded-lg transition-all duration-200 ${
+                viewMode === 'table' 
+                  ? 'bg-gradient-to-r from-indigo-500 to-purple-500 text-white' 
+                  : 'text-gray-300 hover:bg-white/10'
+              }`}
               onClick={() => setViewMode('table')}
             >
               Table
             </button>
             <button
-              className={`px-3 py-1 rounded ${viewMode === 'kanban' ? 'bg-amber-500 text-gray-900' : 'text-gray-300'}`}
+              className={`px-4 py-2 rounded-lg transition-all duration-200 ${
+                viewMode === 'kanban' 
+                  ? 'bg-gradient-to-r from-indigo-500 to-purple-500 text-white' 
+                  : 'text-gray-300 hover:bg-white/10'
+              }`}
               onClick={() => setViewMode('kanban')}
             >
               Kanban
@@ -191,35 +206,35 @@ export function Tasks() {
 
       {/* Tasks Table */}
       {viewMode === 'table' && (
-        <div className="card overflow-hidden">
+        <div className="glass-card overflow-hidden">
           <div className="overflow-x-auto">
             <table className="w-full">
               <thead>
-                <tr className="border-b border-gray-700">
-                  <th className="text-left py-3 px-4 font-medium text-gray-400">Task</th>
-                  <th className="text-left py-3 px-4 font-medium text-gray-400">Status</th>
-                  <th className="text-left py-3 px-4 font-medium text-gray-400">Priority</th>
-                  <th className="text-left py-3 px-4 font-medium text-gray-400">Project</th>
-                  <th className="text-left py-3 px-4 font-medium text-gray-400">Due Date</th>
-                  <th className="text-left py-3 px-4 font-medium text-gray-400">Source</th>
+                <tr className="border-b border-white/10">
+                  <th className="text-left py-4 px-6 font-medium text-gray-400">Task</th>
+                  <th className="text-left py-4 px-6 font-medium text-gray-400">Status</th>
+                  <th className="text-left py-4 px-6 font-medium text-gray-400">Priority</th>
+                  <th className="text-left py-4 px-6 font-medium text-gray-400">Project</th>
+                  <th className="text-left py-4 px-6 font-medium text-gray-400">Due Date</th>
+                  <th className="text-left py-4 px-6 font-medium text-gray-400">Source</th>
                 </tr>
               </thead>
               <tbody>
                 {filteredTasks.map((task) => (
-                  <tr key={task.id} className="border-b border-gray-800 hover:bg-gray-800/50">
-                    <td className="py-3 px-4">
+                  <tr key={task.id} className="border-b border-white/5 hover:bg-white/5 transition-all duration-200">
+                    <td className="py-4 px-6">
                       <div>
-                        <div className="font-medium text-white">{task.title}</div>
+                        <div className="font-medium text-white mb-1">{task.title}</div>
                         {task.description && (
-                          <div className="text-sm text-gray-400 mt-1">{task.description}</div>
+                          <div className="text-sm text-gray-400 font-light">{task.description}</div>
                         )}
                       </div>
                     </td>
-                    <td className="py-3 px-4">
+                    <td className="py-4 px-6">
                       <select
                         value={task.status}
                         onChange={(e) => updateTaskStatus(task.id, e.target.value as Task['status'])}
-                        className="bg-gray-800 text-white text-sm rounded px-2 py-1 border-0"
+                        className="glass-input text-sm min-w-24"
                       >
                         <option value="pending">Pending</option>
                         <option value="in_progress">In Progress</option>
@@ -228,22 +243,22 @@ export function Tasks() {
                         <option value="cancelled">Cancelled</option>
                       </select>
                     </td>
-                    <td className="py-3 px-4">
-                      <div className="flex items-center space-x-1">
+                    <td className="py-4 px-6">
+                      <div className="flex items-center space-x-2">
                         <Flag className={`w-4 h-4 ${priorityColors[task.priority]}`} />
-                        <span className={`text-sm capitalize ${priorityColors[task.priority]}`}>
+                        <span className={`text-sm capitalize font-medium ${priorityColors[task.priority]}`}>
                           {task.priority}
                         </span>
                       </div>
                     </td>
-                    <td className="py-3 px-4">
-                      <span className="bg-gray-700 text-gray-300 px-2 py-1 rounded text-sm">
+                    <td className="py-4 px-6">
+                      <span className="glass-card px-3 py-1 text-gray-300 text-sm font-medium">
                         {task.project || 'Unassigned'}
                       </span>
                     </td>
-                    <td className="py-3 px-4">
+                    <td className="py-4 px-6">
                       {task.due_date ? (
-                        <div className="flex items-center space-x-1 text-sm text-gray-400">
+                        <div className="flex items-center space-x-2 text-sm text-gray-400">
                           <Calendar className="w-4 h-4" />
                           <span>{format(new Date(task.due_date), 'MMM dd')}</span>
                         </div>
@@ -251,8 +266,8 @@ export function Tasks() {
                         <span className="text-gray-500">—</span>
                       )}
                     </td>
-                    <td className="py-3 px-4">
-                      <div className="flex items-center space-x-1 text-sm text-gray-400">
+                    <td className="py-4 px-6">
+                      <div className="flex items-center space-x-2 text-sm text-gray-400">
                         <User className="w-4 h-4" />
                         <span className="capitalize">{task.source || 'manual'}</span>
                       </div>
@@ -267,38 +282,39 @@ export function Tasks() {
 
       {/* Kanban View */}
       {viewMode === 'kanban' && (
-        <div className="grid grid-cols-5 gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-5 gap-6">
           {(['pending', 'in_progress', 'blocked', 'done', 'cancelled'] as const).map((status) => (
             <div key={status} className="space-y-4">
-              <h3 className="text-lg font-semibold text-white capitalize flex items-center space-x-2">
-                <div className={`w-3 h-3 rounded-full ${statusColors[status]}`}></div>
+              <h3 className="text-lg font-medium text-white capitalize flex items-center space-x-3">
+                <div className={`w-3 h-3 rounded-full ${statusColors[status]} shadow-lg`}></div>
                 <span>{status.replace('_', ' ')}</span>
-                <span className="text-sm text-gray-400">
-                  ({filteredTasks.filter(task => task.status === status).length})
+                <span className="text-sm text-gray-400 glass-card px-2 py-1 rounded-full">
+                  {filteredTasks.filter(task => task.status === status).length}
                 </span>
               </h3>
               
-              <div className="space-y-3">
+              <div className="space-y-4">
                 {filteredTasks
                   .filter(task => task.status === status)
                   .map((task) => (
-                    <div key={task.id} className="card p-4">
-                      <h4 className="font-medium text-white mb-2">{task.title}</h4>
+                    <div key={task.id} className="glass-card p-5 hover:-translate-y-1 transition-all duration-200">
+                      <h4 className="font-medium text-white mb-3">{task.title}</h4>
                       {task.description && (
-                        <p className="text-sm text-gray-400 mb-3">{task.description}</p>
+                        <p className="text-sm text-gray-400 mb-4 font-light leading-relaxed">{task.description}</p>
                       )}
                       
                       <div className="flex items-center justify-between">
                         <div className="flex items-center space-x-2">
                           <Flag className={`w-3 h-3 ${priorityColors[task.priority]}`} />
-                          <span className="text-xs bg-gray-700 text-gray-300 px-2 py-1 rounded">
+                          <span className="text-xs glass-card text-gray-300 px-2 py-1 rounded-lg font-medium">
                             {task.project || 'Unassigned'}
                           </span>
                         </div>
                         
                         {task.due_date && (
-                          <span className="text-xs text-gray-400">
-                            {format(new Date(task.due_date), 'MMM dd')}
+                          <span className="text-xs text-gray-400 flex items-center space-x-1">
+                            <Calendar className="w-3 h-3" />
+                            <span>{format(new Date(task.due_date), 'MMM dd')}</span>
                           </span>
                         )}
                       </div>
