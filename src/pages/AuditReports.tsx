@@ -1,8 +1,7 @@
 import { useEffect, useState } from 'react'
 import { supabase } from '../lib/supabase'
 import type { AuditLog } from '../lib/supabase'
-import { LineChart, Line, XAxis, YAxis, ResponsiveContainer, Tooltip } from 'recharts'
-import { FileText, TrendingUp, AlertTriangle, CheckCircle, Calendar, Sparkles } from 'lucide-react'
+import { FileText, TrendingUp, AlertTriangle, CheckCircle,  Sparkles } from 'lucide-react'
 import { format } from 'date-fns'
 
 interface Finding {
@@ -159,7 +158,7 @@ export function AuditReports() {
               >
                 <div className="flex items-center justify-between mb-2">
                   <span className="font-medium text-white">
-                    {audit.audit_type?.replace('_', ' ').toUpperCase() || 'GENERAL'}
+                    {audit.auditor?.replace('_', ' ').toUpperCase() || 'GENERAL'}
                   </span>
                   <span className="text-xs text-gray-400">
                     {format(new Date(audit.timestamp), 'MMM dd')}
@@ -180,7 +179,7 @@ export function AuditReports() {
               <div className="flex items-center justify-between mb-6">
                 <div>
                   <h3 className="text-2xl font-light text-white">
-                    {selectedAudit.audit_type?.replace('_', ' ').toUpperCase() || 'AUDIT REPORT'}
+                    {selectedAudit.auditor?.replace('_', ' ').toUpperCase() || 'AUDIT REPORT'}
                   </h3>
                   <p className="text-gray-400">
                     {format(new Date(selectedAudit.timestamp), 'MMMM dd, yyyy')}

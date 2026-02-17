@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react'
 import { supabase } from '../lib/supabase'
 import type { Project, Task, MemoryLog } from '../lib/supabase'
-import { Plus, Calendar, Users, FileText, CheckCircle, Clock, AlertTriangle, Sparkles, FolderOpen } from 'lucide-react'
+import { Plus, Calendar,  FileText, CheckCircle, Clock, Sparkles, FolderOpen } from 'lucide-react'
 import { format } from 'date-fns'
 
 const statusColors = {
@@ -183,7 +183,7 @@ export function Projects() {
               >
                 <div className="flex items-start justify-between mb-3">
                   <div className="space-y-1">
-                    <h4 className="font-medium text-white">{project.title}</h4>
+                    <h4 className="font-medium text-white">{project.name}</h4>
                     <p className="text-sm text-gray-400 font-light">{project.slug}</p>
                   </div>
                   <div className={`flex items-center space-x-2 px-2 py-1 rounded-full ${statusBgColors[project.status as keyof typeof statusBgColors]}`}>
@@ -197,7 +197,7 @@ export function Projects() {
                 </p>
                 
                 <div className="flex items-center justify-between text-xs text-gray-400">
-                  <span>Created {format(new Date(project.created_at), 'MMM dd')}</span>
+                  <span>Created {format(new Date(project.updated_at), 'MMM dd')}</span>
                   {project.updated_at && (
                     <span>Updated {format(new Date(project.updated_at), 'MMM dd')}</span>
                   )}
@@ -215,7 +215,7 @@ export function Projects() {
               <div className="glass-card p-8">
                 <div className="flex items-start justify-between mb-6">
                   <div className="space-y-2">
-                    <h2 className="text-3xl font-light text-white">{selectedProject.title}</h2>
+                    <h2 className="text-3xl font-light text-white">{selectedProject.name}</h2>
                     <p className="text-gray-400">{selectedProject.slug}</p>
                   </div>
                   <div className={`flex items-center space-x-3 px-4 py-2 rounded-xl ${statusBgColors[selectedProject.status as keyof typeof statusBgColors]}`}>
@@ -231,7 +231,7 @@ export function Projects() {
                 <div className="flex items-center space-x-6 text-sm text-gray-400">
                   <div className="flex items-center space-x-2">
                     <Calendar className="w-4 h-4" />
-                    <span>Created {format(new Date(selectedProject.created_at), 'MMM dd, yyyy')}</span>
+                    <span>Created {format(new Date(selectedProject.updated_at), 'MMM dd, yyyy')}</span>
                   </div>
                   {selectedProject.updated_at && (
                     <div className="flex items-center space-x-2">
