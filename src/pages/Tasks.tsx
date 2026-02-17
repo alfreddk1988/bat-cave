@@ -1,8 +1,9 @@
 import { useEffect, useState } from 'react'
 import { supabase } from '../lib/supabase'
 import type { Task } from '../lib/supabase'
-import { Plus, Search, Filter, Calendar, User, Flag, Sparkles } from 'lucide-react'
+import { Plus, Search, Filter, Calendar, User, Flag, Sparkles, MessageCircle } from 'lucide-react'
 import { format } from 'date-fns'
+import { generateAlfreddDeepLink, generateTaskMessage } from '../utils/telegram'
 
 const statusColors = {
   pending: 'bg-yellow-400',
@@ -217,6 +218,7 @@ export function Tasks() {
                   <th className="text-left py-4 px-6 font-medium text-gray-400">Project</th>
                   <th className="text-left py-4 px-6 font-medium text-gray-400">Due Date</th>
                   <th className="text-left py-4 px-6 font-medium text-gray-400">Source</th>
+                  <th className="text-left py-4 px-6 font-medium text-gray-400">Chat</th>
                 </tr>
               </thead>
               <tbody>
@@ -272,6 +274,15 @@ export function Tasks() {
                         <span className="capitalize">{task.source || 'manual'}</span>
                       </div>
                     </td>
+                    <td className="py-4 px-6">
+                      <button
+                        onClick={() => window.open(generateAlfreddDeepLink(generateTaskMessage(task.title, task.description)), '_blank')}
+                        className="glass-card p-2 hover:bg-indigo-500/20 hover:scale-110 transition-all duration-200 group"
+                        title="Chat with Alfred about this task"
+                      >
+                        <MessageCircle className="w-4 h-4 text-indigo-400 group-hover:text-indigo-300" />
+                      </button>
+                    </td>
                   </tr>
                 ))}
               </tbody>
@@ -311,12 +322,21 @@ export function Tasks() {
                           </span>
                         </div>
                         
-                        {task.due_date && (
-                          <span className="text-xs text-gray-400 flex items-center space-x-1">
-                            <Calendar className="w-3 h-3" />
-                            <span>{format(new Date(task.due_date), 'MMM dd')}</span>
-                          </span>
-                        )}
+                        <div className="flex items-center space-x-2">
+                          {task.due_date && (
+                            <span className="text-xs text-gray-400 flex items-center space-x-1">
+                              <Calendar className="w-3 h-3" />
+                              <span>{format(new Date(task.due_date), 'MMM dd')}</span>
+                            </span>
+                          )}
+                          <button
+                            onClick={() => window.open(generateAlfreddDeepLink(generateTaskMessage(task.title, task.description)), '_blank')}
+                            className="glass-card p-1 hover:bg-indigo-500/20 hover:scale-110 transition-all duration-200 group"
+                            title="Chat with Alfred about this task"
+                          >
+                            <MessageCircle className="w-3 h-3 text-indigo-400 group-hover:text-indigo-300" />
+                          </button>
+                        </div>
                       </div>
                     </div>
                   ))}

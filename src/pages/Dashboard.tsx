@@ -2,8 +2,9 @@ import { useEffect, useState } from 'react'
 import { supabase } from '../lib/supabase'
 import type { DailyBriefing, Task, TokenDailySummary } from '../lib/supabase'
 import { LineChart, Line, XAxis, YAxis, ResponsiveContainer } from 'recharts'
-import { Calendar, DollarSign, CheckCircle, AlertTriangle, Plus, Sparkles } from 'lucide-react'
+import { Calendar, DollarSign, CheckCircle, AlertTriangle, Plus, Sparkles, MessageCircle } from 'lucide-react'
 import { format } from 'date-fns'
+import { generateAlfreddDeepLink, generateTaskMessage } from '../utils/telegram'
 
 export function Dashboard() {
   const [briefing, setBriefing] = useState<DailyBriefing | null>(null)
@@ -62,11 +63,7 @@ export function Dashboard() {
     }
   }
 
-  const tasksByProject = activeTasks.reduce((acc, task) => {
-    const project = task.project || 'Unassigned'
-    acc[project] = (acc[project] || 0) + 1
-    return acc
-  }, {} as Record<string, number>)
+  // Removed tasksByProject as we now display individual tasks
 
   if (loading) {
     return (
@@ -244,16 +241,33 @@ export function Dashboard() {
           </div>
         </div>
 
-        {/* Tasks by Project */}
+        {/* Active Tasks */}
         <div className="glass-card p-8">
-          <h3 className="text-xl font-light text-white mb-6">Active Tasks by Project</h3>
+          <h3 className="text-xl font-light text-white mb-6">Recent Active Tasks</h3>
           <div className="space-y-4">
-            {Object.entries(tasksByProject).map(([project, count]) => (
-              <div key={project} className="flex items-center justify-between p-4 glass-card hover:bg-white/5 transition-all duration-200">
-                <span className="text-gray-300 font-medium">{project}</span>
-                <div className="px-3 py-1 bg-gradient-to-r from-indigo-500 to-purple-500 text-white rounded-full text-sm font-medium">
-                  {count}
+            {activeTasks.slice(0, 5).map((task) => (
+              <div key={task.id} className="flex items-center justify-between p-4 glass-card hover:bg-white/5 transition-all duration-200">
+                <div className="flex-1">
+                  <div className="font-medium text-white mb-1">{task.title}</div>
+                  <div className="flex items-center space-x-3 text-sm text-gray-400">
+                    <span className="glass-card px-2 py-1 rounded-lg">
+                      {task.project || 'Unassigned'}
+                    </span>
+                    <span className={`px-2 py-1 rounded-full text-xs font-medium glass-card ${
+                      task.status === 'pending' ? 'text-yellow-400' :
+                      task.status === 'in_progress' ? 'text-blue-400' : 'text-red-400'
+                    }`}>
+                      {task.status.replace('_', ' ').toUpperCase()}
+                    </span>
+                  </div>
                 </div>
+                <button
+                  onClick={() => window.open(generateAlfreddDeepLink(generateTaskMessage(task.title, task.description)), '_blank')}
+                  className="glass-card p-2 hover:bg-indigo-500/20 hover:scale-110 transition-all duration-200 group"
+                  title="Chat with Alfred about this task"
+                >
+                  <MessageCircle className="w-4 h-4 text-indigo-400 group-hover:text-indigo-300" />
+                </button>
               </div>
             ))}
           </div>

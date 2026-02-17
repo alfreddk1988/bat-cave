@@ -1,8 +1,9 @@
 import { useEffect, useState } from 'react'
 import { supabase } from '../lib/supabase'
 import type { Project, Task, MemoryLog } from '../lib/supabase'
-import { Plus, Calendar,  FileText, CheckCircle, Clock, Sparkles, FolderOpen } from 'lucide-react'
+import { Plus, Calendar,  FileText, CheckCircle, Clock, Sparkles, FolderOpen, MessageCircle } from 'lucide-react'
 import { format } from 'date-fns'
+import { generateAlfreddDeepLink, generateProjectMessage } from '../utils/telegram'
 
 const statusColors = {
   active: 'bg-green-400',
@@ -182,13 +183,25 @@ export function Projects() {
                 onClick={() => setSelectedProject(project)}
               >
                 <div className="flex items-start justify-between mb-3">
-                  <div className="space-y-1">
+                  <div className="space-y-1 flex-1">
                     <h4 className="font-medium text-white">{project.name}</h4>
                     <p className="text-sm text-gray-400 font-light">{project.slug}</p>
                   </div>
-                  <div className={`flex items-center space-x-2 px-2 py-1 rounded-full ${statusBgColors[project.status as keyof typeof statusBgColors]}`}>
-                    <div className={`w-2 h-2 rounded-full ${statusColors[project.status as keyof typeof statusColors]}`}></div>
-                    <span className="text-xs font-medium text-white capitalize">{project.status}</span>
+                  <div className="flex items-center space-x-2">
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation()
+                        window.open(generateAlfreddDeepLink(generateProjectMessage(project.name, project.description)), '_blank')
+                      }}
+                      className="glass-card p-1.5 hover:bg-indigo-500/20 hover:scale-110 transition-all duration-200 group"
+                      title="Chat with Alfred about this project"
+                    >
+                      <MessageCircle className="w-3.5 h-3.5 text-indigo-400 group-hover:text-indigo-300" />
+                    </button>
+                    <div className={`flex items-center space-x-2 px-2 py-1 rounded-full ${statusBgColors[project.status as keyof typeof statusBgColors]}`}>
+                      <div className={`w-2 h-2 rounded-full ${statusColors[project.status as keyof typeof statusColors]}`}></div>
+                      <span className="text-xs font-medium text-white capitalize">{project.status}</span>
+                    </div>
                   </div>
                 </div>
                 
@@ -214,13 +227,22 @@ export function Projects() {
               {/* Project Header */}
               <div className="glass-card p-8">
                 <div className="flex items-start justify-between mb-6">
-                  <div className="space-y-2">
+                  <div className="space-y-2 flex-1">
                     <h2 className="text-3xl font-light text-white">{selectedProject.name}</h2>
                     <p className="text-gray-400">{selectedProject.slug}</p>
                   </div>
-                  <div className={`flex items-center space-x-3 px-4 py-2 rounded-xl ${statusBgColors[selectedProject.status as keyof typeof statusBgColors]}`}>
-                    <div className={`w-3 h-3 rounded-full ${statusColors[selectedProject.status as keyof typeof statusColors]}`}></div>
-                    <span className="font-medium text-white capitalize">{selectedProject.status}</span>
+                  <div className="flex items-center space-x-3">
+                    <button
+                      onClick={() => window.open(generateAlfreddDeepLink(generateProjectMessage(selectedProject.name, selectedProject.description)), '_blank')}
+                      className="btn-secondary flex items-center space-x-2"
+                    >
+                      <MessageCircle className="w-4 h-4" />
+                      <span>Chat with Alfred</span>
+                    </button>
+                    <div className={`flex items-center space-x-3 px-4 py-2 rounded-xl ${statusBgColors[selectedProject.status as keyof typeof statusBgColors]}`}>
+                      <div className={`w-3 h-3 rounded-full ${statusColors[selectedProject.status as keyof typeof statusColors]}`}></div>
+                      <span className="font-medium text-white capitalize">{selectedProject.status}</span>
+                    </div>
                   </div>
                 </div>
                 
