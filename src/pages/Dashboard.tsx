@@ -2,13 +2,24 @@ import { useEffect, useState } from 'react'
 import { supabase } from '../lib/supabase'
 import type { DailyBriefing, Task, TokenDailySummary } from '../lib/supabase'
 import { LineChart, Line, XAxis, YAxis, ResponsiveContainer } from 'recharts'
-import { Calendar, DollarSign, CheckCircle, AlertTriangle, Plus, Sparkles, MessageCircle } from 'lucide-react'
-import { format } from 'date-fns'
+import { Calendar, DollarSign, CheckCircle, AlertTriangle, Plus, Sparkles, MessageCircle, Activity, Clock } from 'lucide-react'
+import { format, formatDistanceToNow } from 'date-fns'
 import { generateAlfreddDeepLink, generateTaskMessage } from '../utils/telegram'
+
+const agents = {
+  Pixel: { emoji: '🎨', role: 'UI/frontend/design' },
+  Forge: { emoji: '🔧', role: 'infrastructure/backend' },
+  Metric: { emoji: '📊', role: 'data collection/analytics' },
+  Scout: { emoji: '🔍', role: 'research/investigation' },
+  Sentinel: { emoji: '🛡️', role: 'audits/security' },
+  Scribe: { emoji: '✍️', role: 'writing/content' },
+  Dispatch: { emoji: '📋', role: 'task management' }
+}
 
 export function Dashboard() {
   const [briefing, setBriefing] = useState<DailyBriefing | null>(null)
   const [activeTasks, setActiveTasks] = useState<Task[]>([])
+  const [completedTasks, setCompletedTasks] = useState<Task[]>([])
   const [tokenSummary, setTokenSummary] = useState<TokenDailySummary | null>(null)
   const [weeklySpend, setWeeklySpend] = useState<any[]>([])
   const [loading, setLoading] = useState(true)
@@ -37,6 +48,16 @@ export function Dashboard() {
         .limit(10)
       
       setActiveTasks(tasksData || [])
+
+      // Load recently completed tasks
+      const { data: completedData } = await supabase
+        .from('tasks')
+        .select('*')
+        .not('completed_at', 'is', null)
+        .order('completed_at', { ascending: false })
+        .limit(5)
+      
+      setCompletedTasks(completedData || [])
 
       // Load today's token summary
       const { data: summaryData } = await supabase
@@ -202,9 +223,9 @@ export function Dashboard() {
         </div>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
         {/* Weekly Spend Chart */}
-        <div className="glass-card p-8">
+        <div className="glass-card p-8 lg:col-span-2">
           <h3 className="text-xl font-light text-white mb-6">7-Day Spending Trend</h3>
           <div className="h-64">
             <ResponsiveContainer width="100%" height="100%">
@@ -241,36 +262,98 @@ export function Dashboard() {
           </div>
         </div>
 
-        {/* Active Tasks */}
+        {/* Recent Completions */}
         <div className="glass-card p-8">
-          <h3 className="text-xl font-light text-white mb-6">Recent Active Tasks</h3>
+          <div className="flex items-center space-x-2 mb-6">
+            <CheckCircle className="w-5 h-5 text-green-400" />
+            <h3 className="text-xl font-light text-white">Recent Completions</h3>
+          </div>
           <div className="space-y-4">
-            {activeTasks.slice(0, 5).map((task) => (
-              <div key={task.id} className="flex items-center justify-between p-4 glass-card hover:bg-white/5 transition-all duration-200">
-                <div className="flex-1">
-                  <div className="font-medium text-white mb-1">{task.title}</div>
-                  <div className="flex items-center space-x-3 text-sm text-gray-400">
-                    <span className="glass-card px-2 py-1 rounded-lg">
-                      {task.project || 'Unassigned'}
-                    </span>
-                    <span className={`px-2 py-1 rounded-full text-xs font-medium glass-card ${
-                      task.status === 'pending' ? 'text-yellow-400' :
-                      task.status === 'in_progress' ? 'text-blue-400' : 'text-red-400'
-                    }`}>
-                      {task.status.replace('_', ' ').toUpperCase()}
-                    </span>
+            {completedTasks.map((task) => (
+              <div key={task.id} className="p-4 glass-card hover:bg-white/5 transition-all duration-200">
+                <div className="font-medium text-white mb-2 text-sm">{task.title}</div>
+                <div className="flex items-center justify-between text-xs text-gray-400">
+                  <div className="flex items-center space-x-2">
+                    {task.agent_name && agents[task.agent_name as keyof typeof agents] && (
+                      <span className="flex items-center space-x-1 glass-card px-2 py-1 rounded">
+                        <span>{agents[task.agent_name as keyof typeof agents].emoji}</span>
+                        <span>{task.agent_name}</span>
+                      </span>
+                    )}
+                    {task.token_cost && (
+                      <span className="text-green-400">${task.token_cost.toFixed(3)}</span>
+                    )}
+                  </div>
+                  <div className="flex items-center space-x-1">
+                    <Clock className="w-3 h-3" />
+                    <span>{task.completed_at ? formatDistanceToNow(new Date(task.completed_at), { addSuffix: true }) : 'Recently'}</span>
                   </div>
                 </div>
-                <button
-                  onClick={() => window.open(generateAlfreddDeepLink(generateTaskMessage(task.title, task.description)), '_blank')}
-                  className="glass-card p-2 hover:bg-indigo-500/20 hover:scale-110 transition-all duration-200 group"
-                  title="Chat with Alfred about this task"
-                >
-                  <MessageCircle className="w-4 h-4 text-indigo-400 group-hover:text-indigo-300" />
-                </button>
               </div>
             ))}
+            {completedTasks.length === 0 && (
+              <div className="text-center text-gray-500 py-8">
+                <CheckCircle className="w-8 h-8 mx-auto mb-2 opacity-50" />
+                <p className="text-sm">No completed tasks yet</p>
+              </div>
+            )}
           </div>
+        </div>
+      </div>
+
+      {/* Active Tasks with Agent Assignments */}
+      <div className="glass-card p-8">
+        <div className="flex items-center space-x-2 mb-6">
+          <Activity className="w-5 h-5 text-indigo-400" />
+          <h3 className="text-xl font-light text-white">Active Tasks with Agent Assignments</h3>
+        </div>
+        <div className="space-y-4">
+          {activeTasks.slice(0, 8).map((task) => (
+            <div key={task.id} className="flex items-center justify-between p-4 glass-card hover:bg-white/5 transition-all duration-200">
+              <div className="flex-1">
+                <div className="font-medium text-white mb-2">{task.title}</div>
+                <div className="flex items-center space-x-3 text-sm text-gray-400">
+                  <span className="glass-card px-2 py-1 rounded-lg">
+                    {task.project || 'Unassigned'}
+                  </span>
+                  <span className={`px-2 py-1 rounded-full text-xs font-medium glass-card ${
+                    task.status === 'pending' ? 'text-yellow-400' :
+                    task.status === 'in_progress' ? 'text-blue-400' : 'text-red-400'
+                  }`}>
+                    {task.status.replace('_', ' ').toUpperCase()}
+                  </span>
+                  {task.agent_name && agents[task.agent_name as keyof typeof agents] && (
+                    <span className="flex items-center space-x-1 glass-card px-2 py-1 rounded text-indigo-300">
+                      <span>{agents[task.agent_name as keyof typeof agents].emoji}</span>
+                      <span>{task.agent_name}</span>
+                      {task.agent_model && (
+                        <span className="text-xs text-gray-500">({task.agent_model})</span>
+                      )}
+                    </span>
+                  )}
+                  {!task.agent_name && (
+                    <span className="text-xs text-gray-500 italic">No agent assigned</span>
+                  )}
+                  {task.token_cost && (
+                    <span className="text-green-400 text-xs">${task.token_cost.toFixed(3)}</span>
+                  )}
+                </div>
+              </div>
+              <button
+                onClick={() => window.open(generateAlfreddDeepLink(generateTaskMessage(task.title, task.description)), '_blank')}
+                className="glass-card p-2 hover:bg-indigo-500/20 hover:scale-110 transition-all duration-200 group"
+                title="Chat with Alfred about this task"
+              >
+                <MessageCircle className="w-4 h-4 text-indigo-400 group-hover:text-indigo-300" />
+              </button>
+            </div>
+          ))}
+          {activeTasks.length === 0 && (
+            <div className="text-center text-gray-500 py-8">
+              <Activity className="w-8 h-8 mx-auto mb-2 opacity-50" />
+              <p className="text-sm">No active tasks</p>
+            </div>
+          )}
         </div>
       </div>
     </div>

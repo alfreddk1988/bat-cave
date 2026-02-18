@@ -21,6 +21,13 @@ export interface DailyBriefing {
   created_at: string
 }
 
+export interface ActivityEntry {
+  timestamp: string
+  action: string        // created, assigned, started, blocked, completed, approved
+  agent?: string        // which agent performed this
+  details?: string      // optional notes
+}
+
 export interface Task {
   id: string
   title: string
@@ -33,7 +40,14 @@ export interface Task {
   notes?: string
   created_at: string
   updated_at: string
-  completed_at?: string
+  completed_at?: string | null
+  // New fields for agent management and tracking
+  agent_name?: string      // Which sub-agent is working on it (Pixel, Forge, Metric, Scout, Sentinel, Scribe, Dispatch)
+  agent_model?: string     // Which model (opus, sonnet, haiku)
+  token_cost?: number      // Total token cost for this task
+  key_outcome?: string     // What success looks like for this task
+  context?: string         // Detailed context about the task
+  activity_log?: ActivityEntry[]  // Timeline of status changes
 }
 
 export interface TokenUsage {
